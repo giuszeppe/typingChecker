@@ -100,18 +100,23 @@ textForm.addEventListener("submit", (e) => {
   */
 	// end old code
 	function callback(results) {
-		const { wrongWords, missingWords, goodWords, inputText, startingText } =
-			results;
+		const {
+			wrongWords,
+			missingWords,
+			extraWords,
+			goodWords,
+			inputText,
+			startingText,
+		} = results;
+		console.log(results);
 
 		endTime = new Date().getTime();
 		const totalTime = (endTime - startTime) / 1000;
 
 		//text replacement
-		if (missingWords < 0) {
-			msswrd.innerHTML = Math.abs(missingWords);
-		} else if (missingWords > 0) {
-			extrawrd.innerHTML = Math.abs(missingWords);
-		}
+		msswrd.innerHTML = missingWords;
+		extrawrd.innerHTML = extraWords;
+
 		userText.innerHTML = inputText.join(" ");
 		adminText.innerHTML = startingText.join(" ");
 		crwrd.innerHTML = goodWords;

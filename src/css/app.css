@@ -94,11 +94,12 @@ ul.result__list {
 	margin: 0px;
 	padding: 20px 50px;
 }
+/*
 .user__text span {
 	color: #e63946;
 	font-weight: bold;
 	font-size: 18px;
-}
+}*/
 .admin__text,
 .user__text {
 	color: #fff;
