@@ -54,6 +54,7 @@ var ttwrd = document.querySelector("div.total__word");
 var accu = document.querySelector("div.accurecy");
 var ttime = document.querySelector("div.total__time");
 var msswrd = document.querySelector("div.missing__word");
+var extrawrd = document.querySelector("div.extra__word");
 var totincrwrd = document.querySelector("div.totincrct__word");
 var dphElem = document.querySelector("div.dph");
 var keyPressed = 0;
@@ -65,7 +66,6 @@ textForm.addEventListener("submit", (e) => {
 	clearInterval(counter);
 	secElm.innerHTML = "00";
 	minElm.innerHTML = "00";
-	//DEVO MODIFICARLO IO
 
 	if (textBox.value.trim().length > 20) {
 		formAssist.classList.remove("show");
@@ -84,7 +84,7 @@ textForm.addEventListener("submit", (e) => {
 		success: callback,
 	});
 
-	/*
+	/* Old code
 	adminText.innerHTML = staticText.innerText;
 	const userTotalText = textBox.value.split(" ");
 	let wrongwords = [];
@@ -98,7 +98,7 @@ textForm.addEventListener("submit", (e) => {
 		txvl = txvl.replace(wrqords, `<span>${wrqords}</span>`);
 	});
   */
-	//FINE MODIFICA MIA
+	// end old code
 	function callback(results) {
 		const { wrongWords, missingWords, goodWords, inputText, startingText } =
 			results;
@@ -107,15 +107,17 @@ textForm.addEventListener("submit", (e) => {
 		const totalTime = (endTime - startTime) / 1000;
 
 		//text replacement
-		document.querySelector("div.missing_label").innerText =
-			missingWords > 0 ? "Total extra words" : "Total missing Words";
+		if (missingWords < 0) {
+			msswrd.innerHTML = Math.abs(missingWords);
+		} else if (missingWords > 0) {
+			extrawrd.innerHTML = Math.abs(missingWords);
+		}
 		userText.innerHTML = inputText.join(" ");
 		adminText.innerHTML = startingText.join(" ");
 		crwrd.innerHTML = goodWords;
 		incrwrd.innerHTML = wrongWords;
 		towrds.innerHTML = startingText.length;
 		ttwrd.innerHTML = textBox.value.split(" ").length;
-		msswrd.innerHTML = Math.abs(missingWords);
 		totalError = Math.abs(missingWords) + wrongWords;
 		totincrwrd.innerHTML = totalError;
 
@@ -165,6 +167,7 @@ disbackSpace.addEventListener("click", () => {
 	}
 });
 
+// It will count only type-addicted key
 function handleKeyDown(e) {
 	const keycode = e.keyCode;
 	console.log(keycode);

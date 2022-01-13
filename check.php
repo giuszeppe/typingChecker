@@ -1,5 +1,6 @@
 <?php
 
+
 function strip_tags_content($text, $tags = '', $invert = FALSE)
 {
 
@@ -33,20 +34,30 @@ if (isset($_POST['userText']) && isset($_POST['staticText'])) {
     $missingOffset = 0;
     $extraOffset = 0;
 
+    //fixed
+    $K = 1;
+    //Weighted comparison constant, you can increase or descrease this to modify performance.
+    $UPPER_BOUND = 80;
+    $LOWER_BOUND = 30;
+
 
     for ($i = 0; $i < count($staticText); $i++) {
         $rightWord = $staticText[$i];
         $userWord = $userText[$i + $extraOffset];
-        //echo $i;
-        //echo $rightWord;
-        //echo $userWord;
+        $difference = strlen($userWord) - strlen($rightWord);
+        $lenghtDifference = $difference > 0 ? $difference : ($difference < 0 ? 1 / abs($difference) : 1);
+
+        $weight = $K / $lenghtDifference;
 
         if ($rightWord == $userWord) {
             $goodWord++;
         } else {
             similar_text(strtoupper($rightWord), strtoupper($userWord), $percent);
 
-            if ($percent > 65 || $appoggio == 0) {
+            $weightedPercent = $weight * 55;
+            $weightedPercent = $weightedPercent >= $UPPER_BOUND ? $UPPER_BOUND : ($weightedPercent <= $LOWER_BOUND ? $LOWER_BOUND : $weightedPercent);
+
+            if ($percent > $weightedPercent || $appoggio == 0) {
                 $wrongWord++;
                 $userText[$i + $extraOffset] = '<span>' . $userWord . '</span>';
             } elseif ($appoggio < 0) {
@@ -62,7 +73,7 @@ if (isset($_POST['userText']) && isset($_POST['staticText'])) {
             }
         }
     }
-    $i = $i++ + $extraOffset;
+    $i = $i + $extraOffset;
     for ($i; $i < count($userText); $i++) {
         $userText[$i] = '<span class="extra_word">' . strip_tags($userText[$i]) . '</span>';
     }
