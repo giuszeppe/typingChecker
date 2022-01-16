@@ -127,16 +127,27 @@ if (isset($_POST['userText']) && isset($_POST['staticText'])) {
         return $ret;
     }
     */
+
+
+
+
     function htmlDiff($old, $new)
     {
+        $sortArr = function ($arr) {
+            return rsort($arr);
+        };
         $missingWord = 0;
         $extraWord = 0;
         $goodWord = 0;
         $wrongWord = 0;
         $percent = 0;
+        
         $ret = [];
         $diff = diff(preg_split("/[\s]+/", $old), preg_split("/[\s]+/", $new));
         foreach ($diff as $k) {
+          $extraSet = 0;
+          $wrongSet = 0;
+          $percents = [];
             $missCount = 0;
             $extraCount = 0;
             if (is_array($k)) {
@@ -144,7 +155,7 @@ if (isset($_POST['userText']) && isset($_POST['staticText'])) {
                     $missCount = count($k['d']);
                     if (empty($k['i'])) {
 
-                        array_push($ret, "<span style='color:red'>" . implode(' ', $k['d']) . "</span> ");
+                        array_push($ret, "<span style='color:orange'>" . implode(' ', $k['d']) . "</span> ");
                     }
                 }
                 if (!empty($k['i'])) {
@@ -153,26 +164,78 @@ if (isset($_POST['userText']) && isset($_POST['staticText'])) {
 
                         array_push($ret, "<span style='color:blue'>" . implode(' ', $k['i']) . "</span> ");
                     } else {
-                        array_push($ret, "<span style='color:green'>" . implode(' ', $k['i']) . "</span> ");
+                      
+                        $extraNumber = 0;
+                        $wrongNumber = 0;
+                        
                         // altro approccio: faccio un confronto 1 a tutti e seleziono come errate quelle con la percentuale di similitudine piu alta
-                        /*
-                        for ($i = 0; $i < count($k['i']); $i++) {
-                            $percent = 0;
-                            array_push($percents, []);
-                            for ($j = 0; $j < count($k['d']); $j++) {
-                                similar_text($k[$j], $k[$i], $percent);
-                                array_push($percents[$i], $percent);
-                            }
-                            //ESTRAZIONE PIU SIMILE
-
-                            //CONTO QUANTE ERRATE E QUANTE EXTRA DOVREBBERO ESSERCI
-                            //SETTO LE ERRATE E METTO LE ALTRE COME EXTRA
+                        if ($missCount - $extraCount < 0) {
+                            $extraNumber = $extraCount - $missCount;
                         }
+                        if ($extraCount - $missCount > 0) {
+                            $wrongNumber = $missCount - $extraCount;
+                        }
+                        
+
+                        
+                      //echo 'extracount: '.$extraCount . ' misscount: ' . $missCount . ' extraNumber: ' .$extraNumber. ' wrongNumber: '. $wrongNumber . '        ';
+
+                        
+
+                        /*$k['i'] contiene la stringa inserita dall'utente nel formato               ['cia', 'dio']
+                          $percents contiene la percentuale di similitudine della parola 
+                          inserita dall'utente con quella originale nel formato
+                          [[60,50,40,90],[40,50,70,80]]
+                            parola 1      parola 2
+
                         */
+                        for ($i = 0; $i < count($k['i']); $i++) {
+                            //echo $i;
+                            
+                            $percent = 0;
+                            $percents[$k['i'][$i]] = [];
+                            for ($j = 0; $j < count($k['d']); $j++) {
+                                similar_text($k['i'][$i], $k['d'][$j], $percent);
+                                $percents[$k['i'][$i]][$k['d'][$j]] = $percent;
+                                
+                            }
+                            //var_dump($wrongSet $wrongNumber) ;
+                           
+                            if($extraNumber == 0){
+                              array_push($ret, "<span style='color:red'>" . $k['i'][$i] . "</span> ");
+                            } elseif($wrongNumber == 0){
+                              array_push($ret, "<span style='color:blue'>" . $k['i'][$i] . "</span> ");
+                              $extraSet++;
+                            } else {
+                              krsort($percents[$k['i'][$i]]);
+                              $max = max($percents[$k['i'][$i]]);
+                              $keys = array_keys($percents);
+                              
+                              if($wrongSet != $missCount){
+                                foreach($keys as $key){
+                                  $mostSimilarWord = false;
+                                  $maxWords = array_keys($percents[$key],$max);
+                                  $mostSimilarWord = array_keys($percents,[$maxWords[0] => $max])[0];
+                                 // print_r(array_keys($percents,[$maxWords[0] => $max])[0]);
+                                  //print_r($percents);
+
+                                  
+                                  if($mostSimilarWord){
+                                    array_push($ret, "<span style='color:red'>" . $mostSimilarWord . "</span> ");
+                                    $wrongSet++;
+                                  } else{
+                                    array_push($ret, "<span style='color:blue'>" . $k['i'][$i] . "</span> ");
+                                    $extraSet++;
+                                  }
+                                } 
+                              }else {
+                                array_push($ret, "<span style='color:blue'>" . $k['i'][$i] . "</span> ");
+                              }
+                            }
+                        }
+
                     }
                 }
-
-
 
                 if ($missCount - $extraCount < 0) {
                     $extraWord += $extraCount - $missCount;

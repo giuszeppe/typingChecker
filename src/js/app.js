@@ -123,7 +123,7 @@ textForm.addEventListener("submit", (e) => {
 		incrwrd.innerHTML = wrongWords;
 		towrds.innerHTML = startingText.length;
 		ttwrd.innerHTML = textBox.value.split(" ").length;
-		totalError = Math.abs(missingWords) + wrongWords;
+		totalError = Math.abs(missingWords) + wrongWords + extraWords;
 		totincrwrd.innerHTML = totalError;
 
 		//metrics
